@@ -9,7 +9,7 @@ networks:
 
 services:
   kong:
-    image: kong:3.7-alpine
+    image: kong:3.9.1-ubuntu
     container_name: ${KONG_INSTANCE_NAME:-kong}
     restart: unless-stopped
     environment:

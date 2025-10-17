@@ -76,7 +76,7 @@ services:
 
   # Kong Public Instance (kong-realm)
   kong-public:
-    image: kong:3.7-alpine
+    image: kong:3.9.1-ubuntu
     container_name: kong-public
     restart: unless-stopped
     environment:
@@ -108,7 +108,7 @@ services:
 
   # Kong Internal Instance (internal-realm)
   kong-internal:
-    image: kong:3.7-alpine
+    image: kong:3.9.1-ubuntu
     container_name: kong-internal
     restart: unless-stopped
     environment:

@@ -43,6 +43,8 @@ var fullCmd = &cobra.Command{
 		fmt.Printf("Project Root: %s\n", projectRoot)
 
 		composeFile := filepath.Join(projectRoot, "compose", "docker-compose.full.yml")
+		envFile := filepath.Join(projectRoot, "compose", "environments", envFlag+".env")
+		dc.EnvFile = envFile
 
 		if err := dc.Up(composeFile, true); err != nil {
 			return fmt.Errorf("failed to deploy full stack: %w", err)
@@ -118,9 +120,12 @@ var multiKongCmd = &cobra.Command{
 		dc := docker.NewDockerCompose(projectRoot, verbose)
 
 		fmt.Println("Deploying multiple Kong instances...")
+		fmt.Printf("Environment: %s\n", envFlag)
 		fmt.Printf("Project Root: %s\n", projectRoot)
 
 		composeFile := filepath.Join(projectRoot, "compose", "docker-compose.multi-kong.yml")
+		envFile := filepath.Join(projectRoot, "compose", "environments", envFlag+".env")
+		dc.EnvFile = envFile
 
 		if err := dc.Up(composeFile, true); err != nil {
 			return fmt.Errorf("failed to deploy multi-Kong: %w", err)

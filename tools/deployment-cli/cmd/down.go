@@ -11,6 +11,7 @@ import (
 
 var (
 	removeVolumes bool
+	envFlagDown   string
 )
 
 // downCmd represents the down command
@@ -26,6 +27,14 @@ var downCmd = &cobra.Command{
 
 		projectRoot := cfg.GetProjectRoot()
 		dc := docker.NewDockerCompose(projectRoot, verbose)
+
+		// Set env file based on environment (use envFlagDown if available)
+		env := envFlagDown
+		if env == "" {
+			env = "dev"
+		}
+		envFile := filepath.Join(projectRoot, "compose", "environments", env+".env")
+		dc.EnvFile = envFile
 
 		if len(args) == 0 || args[0] == "all" {
 			// Stop all components
@@ -83,5 +92,6 @@ var downCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(downCmd)
-	downCmd.Flags().BoolVarP(&removeVolumes, "volumes", "v", false, "Remove volumes")
+	downCmd.Flags().BoolVar(&removeVolumes, "volumes", false, "Remove volumes")
+	downCmd.Flags().StringVar(&envFlagDown, "env", "dev", "environment (dev/prod)")
 }

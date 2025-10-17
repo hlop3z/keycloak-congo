@@ -418,7 +418,7 @@ docker logs kong-gateway
 
 # Validate configuration
 docker run --rm -v $(pwd)/infrastructure/kong/config:/kong \
-  kong:3.7-alpine kong config parse /kong/instances/kong-public.yml
+  kong:3.9.1-ubuntu kong config parse /kong/instances/kong-public.yml
 ```
 
 **Solutions**:
@@ -517,7 +517,7 @@ cp infrastructure/kong/config/instances/kong-public.yml \
 ```yaml
 services:
   kong-api-v2:
-    image: kong:3.7-alpine
+    image: kong:3.9.1-ubuntu
     # ... configuration
     ports:
       - "10000:10000"

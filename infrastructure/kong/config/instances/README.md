@@ -174,7 +174,7 @@ KEYCLOAK_REALM=kong-realm  # or internal-realm, api-v2-realm, etc.
 kc-deploy config validate --file kong-public.yml
 
 # Using Kong directly
-docker run --rm -v $(pwd):/kong kong:3.7-alpine kong config parse /kong/kong-public.yml
+docker run --rm -v $(pwd):/kong kong:3.9.1-ubuntu kong config parse /kong/kong-public.yml
 ```
 
 ### Test Instance

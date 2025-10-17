@@ -12,6 +12,7 @@ import (
 type DockerCompose struct {
 	ProjectRoot string
 	Verbose     bool
+	EnvFile     string
 }
 
 // NewDockerCompose creates a new DockerCompose instance
@@ -24,7 +25,14 @@ func NewDockerCompose(projectRoot string, verbose bool) *DockerCompose {
 
 // Up starts docker-compose services
 func (dc *DockerCompose) Up(composeFile string, detach bool) error {
-	args := []string{"compose", "-f", composeFile, "up"}
+	args := []string{"compose", "-f", composeFile}
+
+	// Add env file if specified
+	if dc.EnvFile != "" {
+		args = append(args, "--env-file", dc.EnvFile)
+	}
+
+	args = append(args, "up")
 	if detach {
 		args = append(args, "-d")
 	}
@@ -34,7 +42,14 @@ func (dc *DockerCompose) Up(composeFile string, detach bool) error {
 
 // Down stops docker-compose services
 func (dc *DockerCompose) Down(composeFile string, volumes bool) error {
-	args := []string{"compose", "-f", composeFile, "down"}
+	args := []string{"compose", "-f", composeFile}
+
+	// Add env file if specified
+	if dc.EnvFile != "" {
+		args = append(args, "--env-file", dc.EnvFile)
+	}
+
+	args = append(args, "down")
 	if volumes {
 		args = append(args, "-v")
 	}

@@ -54,9 +54,9 @@ services:
       KC_PROXY: "${KC_PROXY:-edge}"
       
       # Realm import
-      KC_IMPORT: /opt/keycloak/data/import/realms/*.json
+      KC_IMPORT: /opt/keycloak/data/import/*.json
     volumes:
-      - ./config/realms:/opt/keycloak/data/import/realms:ro
+      - ./config/realms:/opt/keycloak/data/import:ro
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
     networks:

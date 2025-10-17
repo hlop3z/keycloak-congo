@@ -146,8 +146,8 @@ def run_comprehensive_suite(keycloak_url: str, kong_url: str, env: str = "dev") 
     test_start = time.time()
     user_token = None
     try:
-        # Try with default test user (this may fail if user doesn't exist)
-        token_data = get_token(keycloak_url, "kong-realm", "testuser", "testuser123")
+        # Try with default test user (password from realm configuration)
+        token_data = get_token(keycloak_url, "kong-realm", "testuser", "user123")
         user_token = token_data.get("access_token")
         passed = user_token is not None
         message = "Successfully obtained token for testuser"
@@ -205,15 +205,17 @@ def run_comprehensive_suite(keycloak_url: str, kong_url: str, env: str = "dev") 
             }
         )
 
-    # Test 6: Kong health check
+    # Test 6: Kong Admin API health check
     test_start = time.time()
     try:
-        response = requests.get(f"{kong_url}/status", timeout=5)
+        # Kong's admin API is typically on port 8001
+        admin_url = kong_url.replace(":8000", ":8001")
+        response = requests.get(f"{admin_url}/status", timeout=5)
         passed = response.status_code == 200
-        message = "Kong health check passed"
+        message = f"Kong admin API health check {'passed' if passed else 'failed'} (status: {response.status_code})"
     except Exception as e:
         passed = False
-        message = f"Kong health check failed: {e}"
+        message = f"Kong admin API health check failed: {e}"
 
     results.append(
         {
