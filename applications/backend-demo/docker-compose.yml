@@ -1,0 +1,45 @@
+# Standalone Backend Demo Application
+# FastAPI service demonstrating Kong + Keycloak integration
+
+networks:
+  backend-network:
+    driver: bridge
+    name: backend-network
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${SERVICE_NAME:-backend-api}
+    restart: unless-stopped
+    environment:
+      # Application settings
+      APP_NAME: ${APP_NAME:-Backend Demo API}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      
+      # Server configuration
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-8080}
+      WORKERS: ${WORKERS:-1}
+      
+      # CORS settings
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      
+      # Feature flags
+      ENABLE_DOCS: ${ENABLE_DOCS:-true}
+      ENABLE_METRICS: ${ENABLE_METRICS:-true}
+    ports:
+      - "${PORT:-8080}:8080"
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # In production, remove this or set to specific file
+    volumes:
+      - ./src:/app/src:ro
+

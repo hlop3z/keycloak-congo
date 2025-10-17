@@ -1,0 +1,100 @@
+# Kong Public Instance Configuration
+# For public-facing APIs connected to kong-realm
+
+_format_version: "3.0"
+_transform: true
+
+# Services for public APIs
+services:
+  - name: backend-api-public
+    url: http://backend:8080
+    tags:
+      - backend
+      - public
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    
+    routes:
+      - name: public-endpoint
+        paths:
+          - /api/public
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        tags:
+          - public
+        
+      - name: protected-endpoint
+        paths:
+          - /api/protected
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        tags:
+          - protected
+          - jwt-required
+        
+      - name: admin-endpoint
+        paths:
+          - /api/admin
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        strip_path: false
+        tags:
+          - admin
+          - jwt-required
+
+# Global plugins
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+      exposed_headers:
+        - X-Auth-Token
+        - X-Correlation-ID
+      credentials: true
+      max_age: 3600
+      
+  - name: rate-limiting
+    config:
+      second: 100
+      hour: 10000
+      policy: local
+      fault_tolerant: true
+      
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Kong-Request-Id:$(request_id)"
+          - "X-Kong-Instance:kong-public"
+          
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+

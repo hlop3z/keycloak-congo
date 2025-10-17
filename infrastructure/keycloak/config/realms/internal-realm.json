@@ -1,0 +1,83 @@
+{
+  "realm": "internal-realm",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 600,
+  "ssoSessionIdleTimeout": 3600,
+  "ssoSessionMaxLifespan": 86400,
+  "roles": {
+    "realm": [
+      {
+        "name": "internal-admin",
+        "description": "Internal admin role",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "internal-user",
+        "description": "Internal user role",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "kong-internal-client",
+      "name": "Kong Internal Gateway Client",
+      "description": "Client for internal Kong API Gateway",
+      "enabled": true,
+      "publicClient": true,
+      "bearerOnly": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "600"
+      },
+      "fullScopeAllowed": true,
+      "protocolMappers": [
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "internal-admin",
+      "enabled": true,
+      "email": "internal-admin@company.local",
+      "firstName": "Internal",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "internal-admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["internal-admin", "internal-user"],
+      "emailVerified": true
+    }
+  ]
+}

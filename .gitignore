@@ -1,0 +1,85 @@
+# Custom ignore 
+.__examples__/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# But keep examples
+!.env.example
+!**/.env.example
+
+# Docker volumes and data
+volumes/
+data/
+*.tar.gz
+
+# Secrets and certificates
+*.key
+*.crt
+*.pem
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# CLI binaries
+tools/deployment-cli/kc-deploy
+tools/deployment-cli/kc-deploy.exe
+tools/testing-cli/dist/
+tools/testing-cli/*.spec
+
+# Token files from testing
+.token
+.token-*
+token.json
+admin-token.json
+

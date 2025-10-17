@@ -1,0 +1,52 @@
+# Kong Internal Instance Configuration
+# For internal services connected to internal-realm
+
+_format_version: "3.0"
+_transform: true
+
+# Services for internal APIs
+services:
+  - name: backend-api-internal
+    url: http://backend:8080
+    tags:
+      - backend
+      - internal
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    
+    routes:
+      - name: internal-protected
+        paths:
+          - /internal/api
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        tags:
+          - internal
+          - jwt-required
+
+# Stricter rate limiting for internal services
+plugins:
+  - name: rate-limiting
+    config:
+      second: 500
+      hour: 50000
+      policy: local
+      fault_tolerant: true
+      
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Kong-Request-Id:$(request_id)"
+          - "X-Kong-Instance:kong-internal"
+          
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+

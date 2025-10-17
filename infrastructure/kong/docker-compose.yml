@@ -1,0 +1,49 @@
+# Standalone Kong Gateway in DB-less mode
+# Can be deployed independently or as part of larger composition
+# Template supports multiple instances with different configurations
+
+networks:
+  kong-network:
+    driver: bridge
+    name: kong-network
+
+services:
+  kong:
+    image: kong:3.7-alpine
+    container_name: ${KONG_INSTANCE_NAME:-kong}
+    restart: unless-stopped
+    environment:
+      # DB-less mode configuration
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: ${KONG_DECLARATIVE_CONFIG:-/kong/config/kong.yml}
+      
+      # Proxy configuration
+      KONG_PROXY_ACCESS_LOG: ${KONG_PROXY_ACCESS_LOG:-/dev/stdout}
+      KONG_ADMIN_ACCESS_LOG: ${KONG_ADMIN_ACCESS_LOG:-/dev/stdout}
+      KONG_PROXY_ERROR_LOG: ${KONG_PROXY_ERROR_LOG:-/dev/stderr}
+      KONG_ADMIN_ERROR_LOG: ${KONG_ADMIN_ERROR_LOG:-/dev/stderr}
+      KONG_LOG_LEVEL: ${KONG_LOG_LEVEL:-notice}
+      
+      # Admin API
+      KONG_ADMIN_LISTEN: ${KONG_ADMIN_LISTEN:-0.0.0.0:8001}
+      
+      # Proxy listeners
+      KONG_PROXY_LISTEN: ${KONG_PROXY_LISTEN:-0.0.0.0:8000, 0.0.0.0:8443 ssl}
+      
+      # Additional settings
+      KONG_NGINX_WORKER_PROCESSES: ${KONG_NGINX_WORKER_PROCESSES:-auto}
+      KONG_NGINX_HTTP_CLIENT_MAX_BODY_SIZE: ${KONG_NGINX_HTTP_CLIENT_MAX_BODY_SIZE:-10m}
+    volumes:
+      - ./config:/kong/config:ro
+    ports:
+      - "${KONG_PROXY_PORT:-8000}:8000"
+      - "${KONG_PROXY_SSL_PORT:-8443}:8443"
+      - "${KONG_ADMIN_PORT:-8001}:8001"
+    networks:
+      - kong-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+

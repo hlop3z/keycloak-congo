@@ -1,0 +1,113 @@
+# Kong Declarative Configuration Template
+# This template uses environment variable placeholders
+# Actual instances should copy and customize this file
+
+_format_version: "3.0"
+_transform: true
+
+# Configuration metadata
+_comment: |
+  Kong DB-less declarative configuration
+  Keycloak URL: ${KEYCLOAK_URL}
+  Realm: ${REALM_NAME}
+  Backend: ${BACKEND_URL}
+
+# Services define the upstream APIs
+services:
+  - name: ${BACKEND_SERVICE_NAME:-backend-api}
+    url: ${BACKEND_URL:-http://backend:8080}
+    tags:
+      - backend
+      - ${ENVIRONMENT:-dev}
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    
+    # Routes define how requests are sent to services
+    routes:
+      - name: ${BACKEND_SERVICE_NAME:-backend}-public
+        paths:
+          - /api/public
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        preserve_host: false
+        tags:
+          - public
+        
+      - name: ${BACKEND_SERVICE_NAME:-backend}-protected
+        paths:
+          - /api/protected
+        methods:
+          - GET
+          - POST
+        strip_path: false
+        preserve_host: false
+        tags:
+          - protected
+          - jwt-required
+        
+      - name: ${BACKEND_SERVICE_NAME:-backend}-admin
+        paths:
+          - /api/admin
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        strip_path: false
+        preserve_host: false
+        tags:
+          - admin
+          - jwt-required
+
+# Global plugins apply to all services/routes
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+      exposed_headers:
+        - X-Auth-Token
+        - X-Correlation-ID
+      credentials: true
+      max_age: 3600
+      preflight_continue: false
+      
+  - name: rate-limiting
+    config:
+      second: 100
+      hour: 10000
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Kong-Request-Id:$(request_id)"
+          
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+

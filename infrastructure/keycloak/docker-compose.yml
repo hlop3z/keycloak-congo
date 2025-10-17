@@ -1,0 +1,76 @@
+# Standalone Keycloak with PostgreSQL
+# Can be deployed independently or as part of larger composition
+
+networks:
+  keycloak-internal:
+    driver: bridge
+    name: keycloak-internal
+
+volumes:
+  postgres-data:
+    name: keycloak-postgres-data
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: keycloak-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-keycloak}
+      POSTGRES_USER: ${POSTGRES_USER:-keycloak}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - keycloak-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-keycloak}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    restart: unless-stopped
+    environment:
+      # Database configuration
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: ${POSTGRES_DB:-keycloak}
+      KC_DB_USERNAME: ${POSTGRES_USER:-keycloak}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      # Admin credentials
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      
+      # Keycloak configuration
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "${KC_HOSTNAME_STRICT:-false}"
+      KC_HOSTNAME_STRICT_HTTPS: "${KC_HOSTNAME_STRICT_HTTPS:-false}"
+      KC_PROXY: "${KC_PROXY:-edge}"
+      
+      # Realm import
+      KC_IMPORT: /opt/keycloak/data/import/realms/*.json
+    volumes:
+      - ./config/realms:/opt/keycloak/data/import/realms:ro
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+    networks:
+      - keycloak-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - start-dev
+      - --import-realm
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
