@@ -26,7 +26,7 @@ def call_api(
     Returns:
         Response object
     """
-    url = f"{kong_url}{endpoint}"
+    url = f"{kong_url}/{endpoint.lstrip("/")}"
     headers = {}
 
     if token:

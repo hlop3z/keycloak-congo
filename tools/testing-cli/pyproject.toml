@@ -1,7 +1,7 @@
 [project]
-name = "kc-test"
-version = "1.0.0"
-description = "Testing CLI for Kong + Keycloak integration"
+name = "kc_test"
+version = "0.1.5"
+description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -15,14 +15,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3.3", "pytest-cov>=5.0.0", "black>=24.0.0", "ruff>=0.6.0"]
+dev = ["black>=24.0.0", "ruff>=0.6.0"]
 
 [project.scripts]
-kc-test = "cli:main"
+kc-test = "kc_test.cli:main"
 
 [build-system]
-requires = ["setuptools>=68.0"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.9.3,<0.10.0"]
+build-backend = "uv_build"
 
 [tool.black]
 line-length = 100

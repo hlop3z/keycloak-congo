@@ -22,17 +22,18 @@ def token():
 
 @token.command()
 @click.option("--user", required=True, help="Username")
+@click.option("--password", required=True, help="Password")
 @click.option("--realm", default="kong-realm", help="Keycloak realm")
 @click.option("--keycloak-url", default="http://localhost:8080", help="Keycloak URL")
-def get(user, realm, keycloak_url):
+def get(user, password, realm, keycloak_url):
     """Get JWT token for user"""
-    from src.keycloak_client import get_token
+    from kc_test.keycloak_client import get_token
 
     console.print(f"[blue]Getting token for user:[/blue] {user}")
     console.print(f"[blue]Realm:[/blue] {realm}")
 
     # Get password from user
-    password = click.prompt("Password", hide_input=True)
+    # password = click.prompt("Password", hide_input=True)
 
     try:
         token_data = get_token(keycloak_url, realm, user, password)
@@ -51,7 +52,7 @@ def get(user, realm, keycloak_url):
 @click.argument("token")
 def decode(token):
     """Decode JWT token"""
-    from src.keycloak_client import decode_token
+    from kc_test.keycloak_client import decode_token
 
     try:
         payload = decode_token(token)
@@ -75,7 +76,7 @@ def decode(token):
 @click.option("--keycloak-url", default="http://localhost:8080", help="Keycloak URL")
 def refresh(refresh_token_str, realm, keycloak_url):
     """Refresh JWT token"""
-    from src.keycloak_client import refresh_token
+    from kc_test.keycloak_client import refresh_token
 
     console.print(f"[blue]Refreshing token for realm:[/blue] {realm}")
 
@@ -99,15 +100,15 @@ def api():
 
 
 @api.command()
-@click.option("--endpoint", required=True, help="API endpoint")
+@click.option("--endpoint", required=True, help="API endpoint", type=str)
 @click.option("--token", help="JWT token")
 @click.option("--kong-url", default="http://localhost:8000", help="Kong URL")
 @click.option("--method", default="GET", help="HTTP method")
 def call(endpoint, token, kong_url, method):
     """Call API endpoint"""
-    from src.api_tester import call_api
+    from kc_test.api_tester import call_api
 
-    console.print(f"[blue]Calling:[/blue] {method} {kong_url}{endpoint}")
+    console.print(f"[blue]Calling:[/blue] {method} {kong_url}/{endpoint}")
 
     try:
         response = call_api(kong_url, endpoint, method, token)
@@ -123,7 +124,7 @@ def call(endpoint, token, kong_url, method):
 @click.option("--suite", default="integration", help="Test suite name")
 def test(suite):
     """Run API test suite"""
-    from src.api_tester import run_test_suite
+    from kc_test.api_tester import run_test_suite
 
     console.print(f"[blue]Running test suite:[/blue] {suite}")
 
@@ -155,8 +156,8 @@ def suite():
 )
 def run(env, keycloak_url, kong_url, output, format):
     """Run comprehensive test suite"""
-    from src.api_tester import run_comprehensive_suite
-    from src.reporter import generate_report
+    from kc_test.api_tester import run_comprehensive_suite
+    from kc_test.reporter import generate_report
 
     console.print(f"[blue]Running comprehensive tests for environment:[/blue] {env}")
 
@@ -164,7 +165,7 @@ def run(env, keycloak_url, kong_url, output, format):
         results = run_comprehensive_suite(keycloak_url, kong_url, env)
 
         if format == "console":
-            from src.reporter import print_test_results, print_summary
+            from kc_test.reporter import print_test_results, print_summary
 
             print_test_results(results["tests"])
             print_summary(results["passed"], results["failed"], results["total"])
@@ -193,7 +194,7 @@ def keycloak():
 @click.option("--admin-user", default="admin", help="Admin username")
 def list_users(realm, keycloak_url, admin_user):
     """List users in realm"""
-    from src.keycloak_client import KeycloakAdmin
+    from kc_test.keycloak_client import KeycloakAdmin
 
     console.print(f"[blue]Listing users in realm:[/blue] {realm}")
     admin_password = click.prompt("Admin Password", hide_input=True)
@@ -230,7 +231,7 @@ def list_users(realm, keycloak_url, admin_user):
 @click.option("--admin-user", default="admin", help="Admin username")
 def create_user(realm, username, email, keycloak_url, admin_user):
     """Create user in realm"""
-    from src.keycloak_client import KeycloakAdmin
+    from kc_test.keycloak_client import KeycloakAdmin
 
     console.print(f"[blue]Creating user in realm:[/blue] {realm}")
     admin_password = click.prompt("Admin Password", hide_input=True)
@@ -254,7 +255,7 @@ def create_user(realm, username, email, keycloak_url, admin_user):
 @click.option("--admin-user", default="admin", help="Admin username")
 def assign_role(realm, username, role, keycloak_url, admin_user):
     """Assign role to user"""
-    from src.keycloak_client import KeycloakAdmin
+    from kc_test.keycloak_client import KeycloakAdmin
 
     console.print(f"[blue]Assigning role '{role}' to user '{username}' in realm:[/blue] {realm}")
     admin_password = click.prompt("Admin Password", hide_input=True)
@@ -286,7 +287,7 @@ def report():
 def generate(input, format, output):
     """Generate report from test results"""
     import json
-    from src.reporter import generate_report
+    from kc_test.reporter import generate_report
 
     try:
         with open(input, "r") as f:

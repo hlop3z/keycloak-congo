@@ -37,8 +37,8 @@ uv sync
 
 ```bash
 # Get JWT token
-python -m src.cli token get --user testuser --realm kong-realm
-# or: kc-test token get --user testuser --realm kong-realm
+python -m src.cli token get --user testuser --password user123 --realm kong-realm
+# or: kc-test token get --user testuser --password user123 --realm kong-realm
 
 # Decode token
 python -m src.cli token decode <TOKEN>

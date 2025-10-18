@@ -2,9 +2,8 @@
 # FastAPI service demonstrating Kong + Keycloak integration
 
 networks:
-  backend-network:
-    driver: bridge
-    name: backend-network
+  kong-network:
+    external: true
 
 services:
   backend:
@@ -30,10 +29,10 @@ services:
       # Feature flags
       ENABLE_DOCS: ${ENABLE_DOCS:-true}
       ENABLE_METRICS: ${ENABLE_METRICS:-true}
-    ports:
-      - "${PORT:-8080}:8080"
     networks:
-      - backend-network
+      - kong-network
+    # ports:
+    #  - "${PORT:-8080}:8080"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
       interval: 10s

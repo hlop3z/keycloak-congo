@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from typing import Optional
-from src.api.auth import decode_jwt_payload, check_role
+from src.api.auth import decode_jwt_payload, check_role, get_user_info
 
 router = APIRouter(prefix="/api", tags=["API"])
 
@@ -44,12 +44,7 @@ async def protected_endpoint(
         "message": "This is a protected endpoint, accessible with valid JWT",
         "endpoint": "/api/protected",
         "authentication": "required",
-        "user_info": {
-            "username": jwt_payload.get("preferred_username", "unknown"),
-            "email": jwt_payload.get("email", "unknown"),
-            "roles": jwt_payload.get("realm_roles", []),
-            "subject": jwt_payload.get("sub", "unknown"),
-        },
+        "user": get_user_info(jwt_payload),
         "token_info": {
             "issued_at": jwt_payload.get("iat"),
             "expires_at": jwt_payload.get("exp"),

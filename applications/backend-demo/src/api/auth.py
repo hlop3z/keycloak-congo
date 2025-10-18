@@ -79,11 +79,11 @@ def get_user_info(jwt_payload: Dict[str, Any]) -> Dict[str, Any]:
         Dictionary with user information
     """
     return {
+        "id": jwt_payload.get("sub"),
+        "roles": jwt_payload.get("realm_roles", []),
         "username": jwt_payload.get("preferred_username"),
         "email": jwt_payload.get("email"),
         "first_name": jwt_payload.get("given_name"),
         "last_name": jwt_payload.get("family_name"),
-        "subject": jwt_payload.get("sub"),
-        "roles": jwt_payload.get("realm_roles", []),
         "email_verified": jwt_payload.get("email_verified", False),
     }
